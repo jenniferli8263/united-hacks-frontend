@@ -18,26 +18,22 @@
                 "title": "Week 4",
                 "path": "/"
 
-            },
-            {
-                "title": "Week 5",
-                "path": "/"
             }
         ]
     },
     {
-        "title": "Account",
+        "title": "February",
         "childrens": [
             {
-                "title": "Login",
-                "path": "/login"
+                "title": "Week 1",
+                "path": "/"
             },
             {
-                "title": "Register",
-                "path": "/register"
+                "title": "Week 2",
+                "path": "/"
             },
             {
-                "title": "Forgot Password",
+                "title": "Week 3",
                 "path": "/forgot-password"
             },
             {
