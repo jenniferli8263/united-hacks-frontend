@@ -20,7 +20,7 @@ export default function ButtonAppBar() {
   };
 
   return (
-    <AppBar position="static">
+    <AppBar position="fixed">
       <Container maxWidth="xl">
         <Toolbar>
             <IconButton onClick={() => navigate("/")}>
