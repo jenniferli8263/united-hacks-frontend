@@ -29,13 +29,11 @@ export default function ButtonAppBar() {
                 Smart Planner
                 </Typography>
             </IconButton>
-          
           <Box sx={{ marginLeft: 'auto' }}>
             <IconButton onClick={() => navigate("/Dashboard")} sx={{ p: 0 }}>
               <Avatar src='./imgs/avatar.jpg' />
             </IconButton>
           </Box>
-          
         </Toolbar>
       </Container>
     </AppBar>
