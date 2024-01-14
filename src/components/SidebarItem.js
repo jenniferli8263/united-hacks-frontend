@@ -1,8 +1,8 @@
 import { useState } from "react"
+import { generalTaskUpdate } from "./Functions"
 
 export default function SidebarItem({item}){
     const [open, setOpen] = useState(false)
-
     
     if(item.childrens){
         return (
@@ -21,7 +21,7 @@ export default function SidebarItem({item}){
         )
     }else{
         return (
-            <a href={item.path || "#"} className="sidebar-item plain">
+            <a href={item.path || "#"} className="sidebar-item plain" onClick={}>
                 {/* { item.icon && <i className={item.icon}></i> } */}
                 {item.title}
             </a>

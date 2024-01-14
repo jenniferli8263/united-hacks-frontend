@@ -12,6 +12,7 @@ import Avatar from '@mui/material/Avatar';
 import avatarImg from '../imgs/avatar.png';
 import { useNavigate} from 'react-router-dom';
 
+
 export default function ButtonAppBar() {
   const [user, setUser] = React.useState(null);
   const navigate = useNavigate();

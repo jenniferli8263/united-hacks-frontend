@@ -1,5 +1,5 @@
 import SidebarItem from "./SidebarItem"
-import items from "./sidebar.json"
+import items from "../data/sidebar.json"
 
 
 export default function Sidebar(){
