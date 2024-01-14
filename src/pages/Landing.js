@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import Button from '@mui/material/Button';
+// import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 import Typed from 'typed.js';
 
 const TypedEffect = () => {
@@ -81,7 +81,7 @@ const TypedEffect = () => {
           "Practice mindful eating by savoring each bite"], // Strings to display
         // Speed settings, try diffrent values untill you get good results
         startDelay: 300,
-        typeSpeed: 25,
+        typeSpeed: 20,
         backSpeed: 0,
         backDelay: 100,
         fadeOut: true,
@@ -97,10 +97,11 @@ const TypedEffect = () => {
 
     return (
         <div>
-          <span style={{fontSize:'35px', color: '#33FFBD'}}>In the New Year of 2024,</span>
+          <span style={{fontSize:'30px', color: '#4dd6aa'}}>In the New Year of 2024,</span>
           <br />
-          <span style={{fontSize:'35px', color: '#33FFBD'}}>I want to </span>
-          <span ref={el} style={{fontSize:'45px', color: '#D633FF', fontWeight: 'bold'}}></span>
+          <span style={{fontSize:'30px', color: '#4dd6aa', fontWeight: 'bold'}}>iWant </span>
+          <span style={{fontSize:'30px', color: '#4dd6aa'}}>to </span>
+          <span ref={el} style={{fontSize:'40px', color: '#D633FF', fontWeight: 'bold'}}></span>
         </div>
       );
 }
@@ -110,14 +111,15 @@ const Landing = () => {
 
   return (
     <div className="landing">
-      <Container>
+      <Container style={{margin: 'auto', maxWidth: '70vw'}}>
         <Row>
             <Col>
-            <h1 style={{fontSize:'100px'}}>Smart Schedule</h1>
+            <span style={{fontSize:'110px', fontWeight: 'bold'}}>iWant</span>
+            <span style={{fontSize:'25px', fontStyle: 'Italic'}}>, Your AI-powered smart schedule manager</span>
             <TypedEffect />
-            <Button variant="contained" onClick={() => navigate("/Dashboard")} size='large'>
-              Plan Your 2024 →
-            </Button>
+            <Button variant="outline-dark" onClick={() => navigate("/Dashboard")} size='lg' style={{borderWidth:'2px'}}>
+              Plan Your 2024 by iWant →
+            </Button> 
           </Col>
         </Row>
       </Container>

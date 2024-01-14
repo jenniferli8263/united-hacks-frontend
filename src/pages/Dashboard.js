@@ -27,25 +27,35 @@ const Dashboard = () => {
     
     /*Updating the goals and stats*/
     const [taskData, setTaskData] = useState([]); //A list of tasks to display
-    const [monthLabel, setMonthLabel] = useState(""); //E.g. Goals for {monthLabel}
+    const [monthLabel, setMonthLabel] = useState({
+        "title": "January",
+        "childrens": [
+          {"title": "Week 1", "parent": "January"},
+          {"title": "Week 2", "parent": "January"},
+          {"title": "Week 3", "parent": "January"},
+          {"title": "Week 4", "parent": "January"}
+        ]
+      }); //E.g. Goals for {monthLabel}
     const [weekLabel, setWeekLabel] = useState("");
+
 
     const generalTaskUpdate = (month, goals) => {
         setMonthLabel(month);
+        setWeekLabel("");
         setTaskData(goals);
     }
 
     const specificTaskUpdate = (week, goals) => {
         setWeekLabel(week);
+        setMonthLabel("");
         setTaskData(goals);
     }
 
+    
 
-    const writeToLocal = (uuid, data) =>{
-        const existingData = JSON.parse(localStorage.getItem(uuid) || '[]');
-        const updateData = [...existingData, data];
-        const stringData = JSON.stringify(updateData);
-        localStorage.setItem(uuid, stringData);
+    const writeToLocal = (key, data) =>{
+        const stringData = JSON.stringify(data);
+        localStorage.setItem(key, stringData);
 
         console.log("Saved data: "+ stringData);
     }
@@ -69,7 +79,7 @@ const Dashboard = () => {
                 setSpecificSchedule("");
                 setScheduleUUID(data.uuid);
                 setSpecificScheduleUUID("");
-                writeToLocal(data.uuid, data);
+                writeToLocal('general_schedule', data);
             })
             .catch(error => console.error("Error: ", error))
             .finally(() => setIsLoading(false));
@@ -96,7 +106,7 @@ const Dashboard = () => {
             setSpecificSchedule(data.schedule);
             setSpecificScheduleUUID(data.uuid);
             setSpecificMonth(data.month);
-            writeToLocal(data.uuid, data);
+            writeToLocal('detailed_schedule_'+data.month, data);
         })
         .catch(error => console.error("Error: ", error))
         .finally(() => {setIsLoading(false); setCurrentTask("");});
@@ -141,185 +151,140 @@ const Dashboard = () => {
         setCurrentTask("regenerate_detailed_schedule");
         generateDetailedSchedule();
     }
+
+    const reset = (event) =>{
+        console.log('reset');
+        setInput("");
+        setUUID("");
+        setScheduleUUID("");
+        setSpecificScheduleUUID("");
+        setSchedule([]);
+        setSpecificSchedule([]);
+        setSelectedTarget([]);
+        setIsMonthSelected(false);
+        setSpecificMonth("");
+    }
         
     return(
         <div >
-            
             <div className='ai'>
                 <Container className = "grid">
                     <Row className="goal-row">
-                        <Col>
-                            {/* <Sidebar
-                                onMonthChange={generalTaskUpdate}
-                                onWeekChange={specificTaskUpdate}
-                            /> */}
-                            <div className="sidebar">
+                        <Col md="auto">
+                            <div className="sidebar" style={{margin: '10px'}}>
                                 { items.map((item, index) => <SidebarItem key={index} item={item} onMonthChange={generalTaskUpdate} onWeekChange={specificTaskUpdate}/>) }
                             </div>
                         </Col>
-                        
-                        <Col>
-                            <Goals2 
-                            items={taskData}
-                            monthOrWeek = {weekLabel === "" ? "Month" : "Week"}
-    
-                            />
+                        <Col md="auto">
+                            <Card style={{margin: '10px'}}>
+                                <Card.Header>Tasks</Card.Header>
+                                <Card.Body>
+                                    <Goals2 
+                                    self={monthLabel===""?weekLabel:monthLabel}
+                                    items={taskData}
+                                    />
+                                </Card.Body>
+                            </Card>
                         </Col>
-                        <Col>
-                            <Stats monthOrWeek = {weekLabel === "" ? "Month" : "Week"}/>
+                        <Col md="auto">
+                            <Card style={{margin: '10px'}}>
+                                <Card.Header>Stats </Card.Header>
+                                <Card.Body>
+                                    <Stats self={monthLabel===""?weekLabel:monthLabel}/>
+                                </Card.Body>
+                            </Card>
                         </Col>
                     </Row>
-                </Container>
-
-                <br/>
-                {!scheduleUUID && (
-                <div className = "resolution-input">
-                    <Tabs
-                    defaultActiveKey="resolution"
-                    id="uncontrolled-tab-example"
-                    className="mb-3"
-                    >
-                        <Tab eventKey="resolution" title="Generate by Resolution">
-                            <Form onSubmit={handleSubmit}>
-                                <Form.Group className="mb-3" controlId="formResolution">
-                                    <Form.Label>Generate New Schedule by Resolution</Form.Label>
-                                    <Form.Control type="text" placeholder="Your New Year Resolution" value={input} onChange={(e) => setInput(e.target.value)}/>
-                                </Form.Group>
-                                <Button variant="primary" type="submit" disabled={isLoading}>
-                                    {!(isLoading && currentTask==="generate_schedule")&&(<span>Generate</span>)}
-                                    {(isLoading && currentTask==="generate_schedule")&&(
-                                    <div>
-                                        <Spinner
-                                        as="span"
-                                        animation="border"
-                                        size="sm"
-                                        role="status"
-                                        aria-hidden="true"
-                                        />
-                                        <span>Generating</span>
-                                    </div>
-                                    )}
-                                </Button>
-                            </Form>
-                        </Tab>
-                        <Tab eventKey="uuid" title="Fetch by UUID">
-                            <Form onSubmit={getDatabyUUID}>
-                                <Form.Group className="mb-3" controlId="formUUID">
-                                    <Form.Label>Fetch Previously Generated Schedule by UUID</Form.Label>
-                                    <Form.Control type="text" placeholder="UUID" value={UUID} onChange={(e) => setUUID(e.target.value)}/>
-                                </Form.Group>
-                                <Button variant="primary" type="submit" disabled={isLoading}>
-                                    {!(isLoading && currentTask==="fetch_by_uuid")&&(<span>Fetch</span>)}
-                                    {(isLoading && currentTask==="fetch_by_uuid")&&(
-                                    <div>
-                                        <Spinner
-                                        as="span"
-                                        animation="border"
-                                        size="sm"
-                                        role="status"
-                                        aria-hidden="true"
-                                        />
-                                        <span>Fetching</span>
-                                    </div>
-                                    )}
-                                </Button>
-                            </Form>
-                        </Tab>
-                    </Tabs>
-                </div>
-                )}
-                <br/>
-                <div className = "ai-output">  
-                    {schedule.length>0 && (
-                        <Card border='primary' style={{margin: '10px'}}>
-                            <Card.Header>
-                                Generated Schedule
-                            </Card.Header>
-                            <Card.Body>
-                            <Form>
-                            {schedule.map((item, index) => (
-                                <div key={index} className="mb-3">
-                                <Form.Check
-                                    type='radio'
-                                    id={`radio-${index}`}
-                                    name="scheduleRadio"
-                                    label={`${item.month} Activity: ${item.activity}, Goal: ${item.goal}`}
-                                    onChange={()=>{setSelectedTarget(item); setIsMonthSelected(true);}}
-                                    disabled={isLoading}
-                                />
+                    <Row style={{marginTop: '10px'}}>
+                        <Col style={{margin: '10px'}}>
+                            {!scheduleUUID && (
+                                <div className = "resolution-input">
+                                    <Tabs
+                                    defaultActiveKey="resolution"
+                                    id="uncontrolled-tab-example"
+                                    className="mb-3"
+                                    >
+                                        <Tab eventKey="resolution" title="Generate by Resolution">
+                                            <Form onSubmit={handleSubmit}>
+                                                <Form.Group className="mb-3" controlId="formResolution">
+                                                    <Form.Label>Generate New Schedule by Resolution</Form.Label>
+                                                    <Form.Control type="text" placeholder="Your New Year Resolution" value={input} onChange={(e) => setInput(e.target.value)}/>
+                                                </Form.Group>
+                                                <Button variant="primary" type="submit" disabled={isLoading}>
+                                                    {!(isLoading && currentTask==="generate_schedule")&&(<span>Generate</span>)}
+                                                    {(isLoading && currentTask==="generate_schedule")&&(
+                                                    <div>
+                                                        <Spinner
+                                                        as="span"
+                                                        animation="border"
+                                                        size="sm"
+                                                        role="status"
+                                                        aria-hidden="true"
+                                                        />
+                                                        <span>Generating</span>
+                                                    </div>
+                                                    )}
+                                                </Button>
+                                            </Form>
+                                        </Tab>
+                                        <Tab eventKey="uuid" title="Fetch by UUID">
+                                            <Form onSubmit={getDatabyUUID}>
+                                                <Form.Group className="mb-3" controlId="formUUID">
+                                                    <Form.Label>Fetch Previously Generated Schedule by UUID</Form.Label>
+                                                    <Form.Control type="text" placeholder="UUID" value={UUID} onChange={(e) => setUUID(e.target.value)}/>
+                                                </Form.Group>
+                                                <Button variant="primary" type="submit" disabled={isLoading}>
+                                                    {!(isLoading && currentTask==="fetch_by_uuid")&&(<span>Fetch</span>)}
+                                                    {(isLoading && currentTask==="fetch_by_uuid")&&(
+                                                    <div>
+                                                        <Spinner
+                                                        as="span"
+                                                        animation="border"
+                                                        size="sm"
+                                                        role="status"
+                                                        aria-hidden="true"
+                                                        />
+                                                        <span>Fetching</span>
+                                                    </div>
+                                                    )}
+                                                </Button>
+                                            </Form>
+                                        </Tab>
+                                    </Tabs>
                                 </div>
-                            ))}
-                            </Form>
-                            <label><strong>Resolution: </strong>{input}</label>
-                            <br />
-                            <label><strong>Schedule UUID: </strong>{scheduleUUID}</label>
-                            <br />
-                            <Button variant="outline-warning" onClick={regenerateSchedule} disabled={isLoading} size="sm">
-                                {!(isLoading && currentTask==="regenerate_schedule")&&(<span>Regenerate Schedule</span>)}
-                                {(isLoading && currentTask==="regenerate_schedule")&&(
-                                    <div>
-                                        <Spinner
-                                        as="span"
-                                        animation="border"
-                                        size="sm"
-                                        role="status"
-                                        aria-hidden="true"
-                                        />
-                                        <span>Regenerating</span>
-                                    </div>
-                                )}
-                            </Button>{' '}
-                            <Button variant="outline-primary" onClick={getDetailedActions} disabled={isLoading||!isMonthSelected} size="sm">
-                                {!(isLoading && currentTask==="generate_detailed_schedule")&&(<span>Generate Detailed Schedule for {selectedTarget.month}</span>)}
-                                {(isLoading && currentTask==="generate_detailed_schedule")&&(
-                                    <div>
-                                        <Spinner
-                                        as="span"
-                                        animation="border"
-                                        size="sm"
-                                        role="status"
-                                        aria-hidden="true"
-                                        />
-                                        <span>Generating</span>
-                                    </div>
-                                )}
-                            </Button>{' '}
-                            <Button variant="outline-info" onClick={() => navigator.clipboard.writeText(scheduleUUID)} size="sm">Copy Schedule UUID</Button>{' '}
-                            </Card.Body>
-                            
-                        </Card>
-                        )}
-                        {specificSchedule.length>0 && (
-                            <Card style={{margin: '10px'}}>
+                            )}
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            {schedule.length>0 && (
+                            <Card border='primary' style={{margin: '10px'}}>
                                 <Card.Header>
-                                    Generated Detailed Monthly Schedule for {specificMonth}
-                                </Card.Header> 
+                                    Generated Schedule
+                                </Card.Header>
                                 <Card.Body>
-                                    <ul>
-                                        {specificSchedule.map((item, index) => (
-                                            <li key={index}>
-                                                <strong>Week {item.week[4]}</strong> <br></br>
-                                                <strong>Activity:</strong>
-                                                <ul>
-                                                    {item.activity.map((item, index) => (
-                                                    <li key={index}>{item}</li>  
-                                                    ))}
-                                                </ul>
-                        
-                                                <strong>Goals:</strong> 
-                                                <ul>
-                                                    {item.goal.map((item, index) => (
-                                                    <li key={index}>{item}</li>  
-                                                    ))}
-                                                </ul>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    <label><strong>Monthly Schedule UUID: </strong>{specificScheduleUUID}</label>
-                                    <br />
-                                    <Button variant="outline-warning" onClick={regenerateSpecificSchedule} disabled={isLoading} size="sm">
-                                    {!(isLoading && currentTask==="regenerate_detailed_schedule")&&(<span>Regenerate Detailed Schedule</span>)}
-                                    {(isLoading && currentTask==="regenerate_detailed_schedule")&&(
+                                <Form>
+                                {schedule.map((item, index) => (
+                                    <div key={index} className="mb-3">
+                                    <Form.Check
+                                        type='radio'
+                                        id={`radio-${index}`}
+                                        name="scheduleRadio"
+                                        label={`${item.month} Activity: ${item.activity}, Goal: ${item.goal}`}
+                                        onChange={()=>{setSelectedTarget(item); setIsMonthSelected(true);}}
+                                        disabled={isLoading}
+                                    />
+                                    </div>
+                                ))}
+                                </Form>
+                                <label><strong>Resolution: </strong>{input}</label>
+                                <br />
+                                <label><strong>Schedule UUID: </strong>{scheduleUUID}</label>
+                                <br />
+                                <Button variant="outline-danger" onClick={reset} disabled={isLoading} size="sm">Reset</Button>{' '}
+                                <Button variant="outline-warning" onClick={regenerateSchedule} disabled={isLoading} size="sm">
+                                    {!(isLoading && currentTask==="regenerate_schedule")&&(<span>Regenerate Schedule</span>)}
+                                    {(isLoading && currentTask==="regenerate_schedule")&&(
                                         <div>
                                             <Spinner
                                             as="span"
@@ -331,12 +296,80 @@ const Dashboard = () => {
                                             <span>Regenerating</span>
                                         </div>
                                     )}
-                                    </Button>{' '}
-                                    <Button variant="outline-info" onClick={() => navigator.clipboard.writeText(specificScheduleUUID)} size="sm">Copy Detailed Schedule UUID</Button>{' '}
+                                </Button>{' '}
+                                <Button variant="outline-primary" onClick={getDetailedActions} disabled={isLoading||!isMonthSelected} size="sm">
+                                    {!(isLoading && currentTask==="generate_detailed_schedule")&&(<span>Generate Detailed Schedule for {selectedTarget.month}</span>)}
+                                    {(isLoading && currentTask==="generate_detailed_schedule")&&(
+                                        <div>
+                                            <Spinner
+                                            as="span"
+                                            animation="border"
+                                            size="sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                            />
+                                            <span>Generating</span>
+                                        </div>
+                                    )}
+                                </Button>{' '}
+                                <Button variant="outline-info" onClick={() => navigator.clipboard.writeText(scheduleUUID)} size="sm">Copy Schedule UUID</Button>{' '}
                                 </Card.Body>
                             </Card>
-                        )}
-                </div>
+                            )}
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            {specificSchedule.length>0 && (
+                                <Card style={{margin: '10px'}}>
+                                    <Card.Header>
+                                        Generated Detailed Monthly Schedule for {specificMonth}
+                                    </Card.Header> 
+                                    <Card.Body>
+                                        <ul>
+                                            {specificSchedule.map((item, index) => (
+                                                <li key={index}>
+                                                    <strong>Week {item.week[4]}</strong> <br></br>
+                                                    <strong>Activity:</strong>
+                                                    <ul>
+                                                        {item.activity.map((item, index) => (
+                                                        <li key={index}>{item}</li>  
+                                                        ))}
+                                                    </ul>
+                            
+                                                    <strong>Goals:</strong> 
+                                                    <ul>
+                                                        {item.goal.map((item, index) => (
+                                                        <li key={index}>{item}</li>  
+                                                        ))}
+                                                    </ul>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                        <label><strong>Monthly Schedule UUID: </strong>{specificScheduleUUID}</label>
+                                        <br />
+                                        <Button variant="outline-warning" onClick={regenerateSpecificSchedule} disabled={isLoading} size="sm">
+                                        {!(isLoading && currentTask==="regenerate_detailed_schedule")&&(<span>Regenerate Detailed Schedule</span>)}
+                                        {(isLoading && currentTask==="regenerate_detailed_schedule")&&(
+                                            <div>
+                                                <Spinner
+                                                as="span"
+                                                animation="border"
+                                                size="sm"
+                                                role="status"
+                                                aria-hidden="true"
+                                                />
+                                                <span>Regenerating</span>
+                                            </div>
+                                        )}
+                                        </Button>{' '}
+                                        <Button variant="outline-info" onClick={() => navigator.clipboard.writeText(specificScheduleUUID)} size="sm">Copy Detailed Schedule UUID</Button>{' '}
+                                    </Card.Body>
+                                </Card>
+                            )}
+                        </Col>
+                    </Row>
+                </Container>
             </div>
         </div>
     );

@@ -26,7 +26,7 @@ export default function ButtonAppBar() {
         <Toolbar>
             <IconButton onClick={() => navigate("/")}>
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1, color:"white"}}>
-                Smart Planner
+                iWant - Your smart schedule planner
                 </Typography>
             </IconButton>
           <Box sx={{ marginLeft: 'auto' }}>
